@@ -1,0 +1,15 @@
+{
+  "name": "eclipse-docs",
+  "version": "1.0.0",
+  "description": "Documentation site for Eclipse — the white-label studio management platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.5.0"
+  }
+}
