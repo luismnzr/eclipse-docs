@@ -47,17 +47,15 @@ No marques no-show cuando:
 
 **Consecuencia del no-show:** El alumno pierde el crédito de esa clase. No se le devuelve. Si usa suscripción ilimitada, no hay impacto en su cuenta, pero sí queda el registro.
 
-## Validar check-ins de Wellhub
+## Check-ins de Wellhub
 
-Si tu clase tiene alumnos de Wellhub, además de marcar asistencia debes **validar su check-in** en el sistema de Wellhub.
+Si tu clase tiene alumnos de Wellhub, **los check-ins se validan automáticamente**. Eclipse los reporta a Wellhub en cuanto llega la reservación, así que no tienes que hacer nada extra para que el estudio reciba el pago.
 
-1. En la lista de la clase, identifica los alumnos de Wellhub (aparecen marcados como externos)
-2. Cuando el alumno llegue a clase, haz clic en **Validar check-in**
-3. Confirma
+Los alumnos de Wellhub aparecen en tu lista marcados como **check-ins externos**. Solo asegúrate de que estén presentes en clase como con cualquier otro alumno.
 
-Esto avisa a Wellhub que el alumno efectivamente asistió, lo cual es necesario para que el estudio reciba el pago correspondiente.
+### Validación manual (excepcional)
 
-> **Importante:** Si olvidas validar un check-in de Wellhub, el estudio podría perder el ingreso por ese alumno. Hazlo al momento.
+En casos raros donde un check-in no se haya enviado automáticamente (por ejemplo, un problema técnico con la integración), puedes validarlo manualmente desde la lista de la clase con el botón **Validar check-in**. Si notas que esto pasa con frecuencia, avisa al administrador del estudio.
 
 ## Deshacer un no-show
 
@@ -75,8 +73,9 @@ Al terminar cada clase, toma 2 minutos para:
 
 1. **Marcar asistencia** de todos los alumnos que estuvieron
 2. **Marcar no-show** de los que no llegaron
-3. **Validar check-ins de Wellhub** si aplica
-4. Cerrar el panel y listo
+3. Cerrar el panel y listo
+
+Los check-ins de Wellhub se procesan solos, así que no hace falta un paso adicional para ellos.
 
 ## ¿Qué pasa con la lista de espera?
 

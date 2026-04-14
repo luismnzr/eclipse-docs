@@ -8,8 +8,10 @@ Eclipse se integra con **Wellhub** (antes llamado Gympass), la plataforma de bie
 2. **Eclipse sincroniza tu horario con Wellhub** — las clases aparecen en la app de Wellhub
 3. **Los usuarios de Wellhub reservan** desde su app
 4. **Eclipse recibe la reservación** y el alumno queda registrado en la clase
-5. **Validas el check-in** cuando el alumno llega al estudio
+5. **El check-in se valida automáticamente** — Eclipse confirma el check-in con Wellhub sin que tengas que hacer nada
 6. **Wellhub te paga** por los check-ins validados (el proceso de pago lo manejas directamente con Wellhub)
+
+> **Los check-ins son automáticos.** En cuanto la reservación entra a Eclipse, el check-in queda registrado y enviado a Wellhub. Solo necesitarás intervenir manualmente en casos excepcionales (por ejemplo, si hubo un problema técnico con la integración).
 
 ## Requisitos previos
 
@@ -46,19 +48,23 @@ Ve a **Clases** y abre una clase específica. Verás:
 
 Ve a **Wellhub Bookings** en el menú para ver todas las reservaciones que llegaron a través de Wellhub, ordenadas por fecha.
 
-## Validar check-ins
+## Check-ins automáticos
 
-Cuando un alumno de Wellhub llega a clase, debes **validar su check-in**. Esto confirma su asistencia y le indica a Wellhub que el alumno efectivamente asistió.
+**No necesitas validar los check-ins manualmente.** Cuando un usuario de Wellhub reserva una clase, Eclipse registra automáticamente el check-in y lo reporta a Wellhub. El alumno aparecerá en la lista de la clase marcado como check-in externo, ya validado.
 
-### Desde el panel de administración
+### Validación manual (solo si es necesario)
+
+En casos excepcionales (por ejemplo, si la integración tuvo un problema y un check-in quedó sin enviar), puedes validarlo manualmente:
+
+#### Desde el panel de administración
 
 1. Ve a la clase del día en **Clases**
 2. Encuentra al alumno de Wellhub en la lista
 3. Haz clic en **Validar check-in**
 
-### Desde el panel del profesor
+#### Desde el panel del profesor
 
-Los profesores también pueden validar check-ins directamente desde su lista de clase. Ver [Asistencia del profesor](../profesor/asistencia.md).
+Los profesores también pueden validar check-ins manualmente desde su lista de clase si detectan alguna inconsistencia. Ver [Asistencia del profesor](../profesor/asistencia.md).
 
 ## Check-ins externos manuales
 
@@ -83,7 +89,7 @@ Puedes exportar los check-ins externos para reconciliar con Wellhub:
 ## Consejos
 
 - **Sincroniza el horario al inicio de cada semana** — Asegúrate de que Wellhub siempre tenga tu horario actualizado
-- **Valida check-ins el mismo día** — No dejes pendientes para no olvidar
+- **Confía en los check-ins automáticos** — No necesitas validarlos uno por uno; solo interviene si detectas una inconsistencia
 - **Revisa las reservaciones de Wellhub** como parte de tu rutina diaria
 - **Guarda los reportes** de check-ins para tu contabilidad
 
@@ -93,7 +99,7 @@ Puedes exportar los check-ins externos para reconciliar con Wellhub:
 |----------|----------|
 | "Mi clase no aparece en Wellhub" | Sincroniza el horario desde Configuración |
 | "Un alumno de Wellhub no aparece en la lista" | Revisa Wellhub Bookings y valida manualmente si es necesario |
-| "No puedo validar un check-in" | Verifica que el alumno esté en la lista correcta de la clase |
+| "Un check-in no se registró automáticamente" | Valídalo manualmente desde la lista de la clase o desde External Check-ins |
 | "Discrepancia en los pagos" | Exporta los datos y contacta al soporte de Wellhub |
 
 ---
