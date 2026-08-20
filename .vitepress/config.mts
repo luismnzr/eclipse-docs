@@ -51,6 +51,7 @@ export default defineConfig({
             { text: 'Reportes', link: '/manual/admin/reportes' },
             { text: 'Eventos', link: '/manual/admin/eventos' },
             { text: 'Tienda', link: '/manual/admin/tienda' },
+            { text: 'Activar Wellhub', link: '/manual/admin/wellhub-activacion' },
             { text: 'Wellhub', link: '/manual/admin/wellhub' },
           ],
         },

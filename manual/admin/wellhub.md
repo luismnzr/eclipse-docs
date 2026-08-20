@@ -13,25 +13,23 @@ Eclipse se integra con **Wellhub** (antes llamado Gympass), la plataforma de bie
 
 > **Los check-ins son automáticos.** En cuanto la reservación entra a Eclipse, el check-in queda registrado y enviado a Wellhub. Solo necesitarás intervenir manualmente en casos excepcionales (por ejemplo, si hubo un problema técnico con la integración).
 
-## Requisitos previos
+## ¿Todavía no la activas?
 
-Para usar esta integración necesitas:
+Si es la primera vez que conectas Wellhub con tu instancia, sigue la [guía de activación paso a paso](./wellhub-activacion.md). Ahí está el proceso completo: qué datos enviar a Eclipse, cómo conectar desde el portal de Wellhub y cómo dejar tu horario publicado.
 
-- Tener un contrato activo con Wellhub como estudio partner
-- Tu ID de gimnasio de Wellhub
-- Tu API key de Wellhub
-
-Estos datos se configuran en el archivo de configuración de tu instancia. Si no los tienes, contacta al soporte de Eclipse para que lo activemos por ti.
+Lo único que necesitas de tu lado es un contrato activo con Wellhub como estudio partner y tu Gym ID. El resto lo configura Eclipse contigo.
 
 ## Sincronizar tu horario
 
-Una vez configurada la integración, necesitas sincronizar tu horario para que aparezca en Wellhub.
+**La sincronización es automática.** Eclipse envía tu horario a Wellhub cada 30 minutos, y los cambios de horario y las cancelaciones de clase se envían en el momento en que los haces.
+
+Si necesitas forzarla —por ejemplo, acabas de cargar el horario de la semana y quieres verlo publicado ya— puedes hacerlo a mano:
 
 1. Ve a **Configuración**
-2. Busca la sección de **Wellhub**
-3. Haz clic en **Sincronizar con Wellhub**
+2. Busca la sección **Integración con Wellhub**
+3. Haz clic en **Sincronizar Ahora**
 
-Esto envía tu horario actual a Wellhub. Repítelo cada vez que hagas cambios importantes al horario (nuevas clases, cambios de hora, etc.).
+Debajo verás el panel **Estado de Sincronización con Wellhub**, con cuántas plantillas y clases ya están publicadas y el motivo de las que faltan.
 
 ## Ver reservaciones de Wellhub
 
@@ -88,7 +86,7 @@ Puedes exportar los check-ins externos para reconciliar con Wellhub:
 
 ## Consejos
 
-- **Sincroniza el horario al inicio de cada semana** — Asegúrate de que Wellhub siempre tenga tu horario actualizado
+- **Revisa el panel de estado de sincronización** — La sincronización es automática, pero el panel te avisa si alguna clase quedó fuera y por qué
 - **Confía en los check-ins automáticos** — No necesitas validarlos uno por uno; solo interviene si detectas una inconsistencia
 - **Revisa las reservaciones de Wellhub** como parte de tu rutina diaria
 - **Guarda los reportes** de check-ins para tu contabilidad
@@ -97,7 +95,7 @@ Puedes exportar los check-ins externos para reconciliar con Wellhub:
 
 | Problema | Solución |
 |----------|----------|
-| "Mi clase no aparece en Wellhub" | Sincroniza el horario desde Configuración |
+| "Mi clase no aparece en Wellhub" | Revisa el panel de estado en Configuración: ahí se lista el motivo (categoría sin mapear, plantilla sin marcar, clase fuera de la ventana de reservación) |
 | "Un alumno de Wellhub no aparece en la lista" | Revisa Wellhub Bookings y valida manualmente si es necesario |
 | "Un check-in no se registró automáticamente" | Valídalo manualmente desde la lista de la clase o desde External Check-ins |
 | "Discrepancia en los pagos" | Exporta los datos y contacta al soporte de Wellhub |

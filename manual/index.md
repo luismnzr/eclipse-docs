@@ -20,7 +20,8 @@ Todo lo que necesitas para configurar y operar tu estudio desde el panel de admi
 | [Reportes](./admin/reportes.md) | Entender las métricas de tu estudio |
 | [Eventos](./admin/eventos.md) | Talleres, retiros y eventos especiales |
 | [Tienda](./admin/tienda.md) | Vender productos físicos desde el panel |
-| [Wellhub](./admin/wellhub.md) | Integración con Wellhub (antes Gympass) |
+| [Activar Wellhub](./admin/wellhub-activacion.md) | Conectar Wellhub con tu instancia por primera vez |
+| [Wellhub](./admin/wellhub.md) | Operar la integración con Wellhub (antes Gympass) |
 
 ## Manual del Profesor
 
