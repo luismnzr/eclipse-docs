@@ -68,6 +68,7 @@ The base application is intentionally minimal in its visual design (black-and-wh
 | [Configuration](./configuration.md) | Environment variables and studio settings |
 | [Modules & Licensing](./modules.md) | Presets, `ECLIPSE_MODULES`, gating features per instance |
 | [Creating a New Instance](./creating-an-instance.md) | Step by step: fabricate, launch, verify, pause or tear down a client instance |
+| [Launching a New Store](./new-store.md) | Checkbox runbook for a `store` instance, from the client's data to go-live |
 | **Features** | |
 | [Reservations](../features/reservations.md) | Booking, cancellation, and attendance |
 | [Packages & Credits](../features/packages-and-credits.md) | Credit-based class packages |

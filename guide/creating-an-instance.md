@@ -2,6 +2,10 @@
 
 Step-by-step guide to fabricate, launch and hand off a new Eclipse client instance. The running example is a **store** (ecommerce-only) instance called `tienda-luna`, but every step applies to the other presets — differences are called out inline.
 
+::: tip Launching a store?
+[Launching a New Store](./new-store.md) is the condensed, checkbox-style runbook for the `store` preset. This page is the reference behind it.
+:::
+
 ::: tip Source of truth
 This page mirrors the operations docs in the base repo: [`docs/FABRICA.md`](https://github.com/luismnzr/eclipse-v1/blob/main/docs/FABRICA.md), [`docs/MODULOS.md`](https://github.com/luismnzr/eclipse-v1/blob/main/docs/MODULOS.md) and [`docs/CLIENT_SETUP_GUIDE.md`](https://github.com/luismnzr/eclipse-v1/blob/main/docs/CLIENT_SETUP_GUIDE.md). If they disagree, the scripts in `bin/` win.
 :::
@@ -64,7 +68,7 @@ bin/eclipse_new tienda-luna --modules shop,marketing --github luismnzr/tienda-lu
 - A **Postmark** server for the client (transactional emails; `marketing` also needs a `broadcast` stream)
 - A **MUX** environment, only with `video`
 
-## Step 1 — Refresh the base
+## Step 1 — Refresh the base {#step-1-refresh-the-base}
 
 The factory refuses to clone from a stale `main`: an instance born from an outdated base is exactly the silent failure it guards against.
 
@@ -73,7 +77,7 @@ cd ~/dev/eclipse-v1
 git checkout main && git pull
 ```
 
-## Step 2 — Fabricate the clone (local phase, $0)
+## Step 2 — Fabricate the clone (local phase, $0) {#step-2-fabricate-the-clone-local-phase-0}
 
 ```bash
 bin/eclipse_new tienda-luna --preset store \
@@ -92,6 +96,7 @@ All flags:
 | `--base URL\|PATH` | Where to clone from (default: the base's `origin`) |
 | `--github OWNER/REPO` | Create the client's **private** repo with `gh` and push the initial commit |
 | `--heroku` | Also run the Heroku phase (starts billing) |
+| `--local` | Explicit form of the default (local phase only); rejected together with `--heroku` |
 | `--skip-heroku` | Run the Heroku phase against an app that already exists (implies `--heroku`) |
 | `--no-setup` | Only clone + write the license — for a throwaway test clone |
 | `--dry-run` | Print what it would do without executing |
@@ -111,16 +116,28 @@ What `bin/eclipse_new` does, in order:
 
 | Prompt | Default | Notes |
 |--------|---------|-------|
-| Heroku app name | Folder name (`tienda-luna`) | **The only required value.** Validated for format (lowercase, digits, hyphens, starts with a letter, ≤ 30 chars) and that it doesn't already exist in your Heroku account |
+| Preset | `studio` | **Only when neither `--preset` nor `--modules` was given** (manual path). `bin/eclipse_new` always passes them, so it never asks |
+| Heroku app name | Folder name (`tienda-luna`) | **The only required value.** Validated for format (lowercase, digits, hyphens, starts with a letter, no trailing hyphen, ≤ 30 chars) and — if the `heroku` CLI is installed and logged in — that it doesn't already exist in your account. Without the CLI the availability check is skipped; a name taken by *another* account is only caught in the Heroku phase |
 | Studio name | Derived from the app name (`Tienda Luna`) | |
 | Domain | *(blank)* | Blank = the `*.herokuapp.com` URL Heroku assigns later |
 | Primary brand color | *(blank)* | Hex, e.g. `#0d9488`. Written to `--color-primary` in `theme.css` |
 
-Then it:
+Then two confirmations — **both default to No, so type `y`**:
+
+| Confirmation | Answer | Why |
+|--------------|--------|-----|
+| `Proceed with setup? [y/N]` | `y` | Enter aborts without writing anything |
+| `Reinitialize git history for this client? (removes .git, runs git init) [y/N]` | **`y`** | Asked because the clone's `origin` still points at `eclipse-v1` |
+
+After that it:
 
 - Writes the full manifest to `config/instance.yml` (client, app, domain, preset, modules, `base_version`, `created_at`).
 - Updates `app/assets/stylesheets/theme.css` with the brand color (if given).
-- **Wipes the base's git history** (`origin` pointed at `eclipse-v1`) and creates the client's initial commit — manifest, DB rename and color included.
+- **Wipes the base's git history** (`rm -rf .git && git init -b main`) and creates the client's initial commit — manifest, DB rename and color included.
+
+::: danger Don't answer No to the git reinit
+With `N` the clone keeps the **entire `eclipse-v1` history** (only a "Configura instancia" commit is added on top), and `--github` then removes `origin` and pushes all of it to the client's repo. If that happens: delete the client repo on GitHub, delete the clone folder and fabricate again.
+:::
 
 The resulting manifest looks like:
 
@@ -152,7 +169,7 @@ git push -u origin main
 `bin/setup_client` with no phase flag runs **both** phases in one go (with the cost warning in between). Use `bin/setup_client --dry-run` to walk through every prompt without executing anything.
 :::
 
-## Step 3 — Build and demo it locally
+## Step 3 — Build and demo it locally {#step-3-build-and-demo-it-locally}
 
 Develop the client's design and show it to them without paying for hosting:
 
@@ -171,7 +188,7 @@ bin/dev                                  # Rails + Tailwind watcher on :3000
 
 This is where the client-specific design work happens (see [Theming](../features/theming.md)): `theme.css` tokens, logo and icons in `public/`, and any component overrides. Commit and push to the client's repo as you go.
 
-## Step 4 — Launch on Heroku (billing starts)
+## Step 4 — Launch on Heroku (billing starts) {#step-4-launch-on-heroku-billing-starts}
 
 When the client is ready to go live:
 
@@ -200,6 +217,13 @@ Only what applies to the license is asked:
 
 For our `store` instance there are no policy, Wellhub or MUX prompts.
 
+A few details worth knowing before you start typing:
+
+- The Stripe prompts say `sk_live_...` / `pk_live_...`, but any key works. The usual order is **test keys first** (to run the checklist in [Step 6](#step-6-verify-before-handoff)) and swap to live at the end — or leave them pending with Enter.
+- The Stripe webhook secret only exists once the webhook endpoint is created in the client's Stripe dashboard. If the domain isn't final yet, leave it pending and set it in [Step 5](#step-5-post-launch-manual-steps).
+- The sender address defaults to the contact email; if that was left blank the sender becomes pendable too (mail would go out as `hello@eclipse.dev`).
+- After the summary the script prints the cost warning and asks `Proceed with setup? [y/N]` — **this is the last point before billing starts.**
+
 ::: warning S3 is not optional for a store
 Without `AWS_BUCKET`, production saves uploads on the dyno's disk, which Heroku wipes on every restart and deploy — product photos and hero slides would disappear. Give every instance that uploads images the shared bucket and its own `STORAGE_PREFIX` (e.g. `tienda-luna`).
 :::
@@ -226,7 +250,7 @@ A pending key is never uploaded empty — the instance launches anyway and the f
 `bin/eclipse_new tienda-luna --preset store --github luismnzr/tienda-luna --heroku` runs both phases back to back.
 :::
 
-## Step 5 — Post-launch manual steps
+## Step 5 — Post-launch manual steps {#step-5-post-launch-manual-steps}
 
 The script prints these at the end. For a store:
 
@@ -245,7 +269,7 @@ The script prints these at the end. For a store:
    - For a **studio**: categories, class templates, teachers, schedule, packages and subscription plans instead (and with Wellhub, tenant registration on the gateway — see [Integrations](../features/integrations.md)).
 7. **Home** — hero slides in **Admin → Inicio (Hero)** (without slides, the static hero is shown).
 
-## Step 6 — Verify before handoff
+## Step 6 — Verify before handoff {#step-6-verify-before-handoff}
 
 **Automated smoke** — from any checkout of the base, against the live instance:
 
@@ -254,6 +278,17 @@ bin/eclipse_smoke https://tiendaluna.mx --modules shop
 ```
 
 It checks the universal routes (`/up`, `/`, `/login`, `/signup`, `/privacidad`, `/contacto`, `robots.txt`, `sitemap.xml`, Stripe webhook alive), that licensed modules answer and **unlicensed ones are 404** (for a store: `/classes`, `/packages`, `/eventos`, `/video` and the Wellhub/MUX/Postmark webhooks must be 404). A `500` on `POST /webhooks/stripe` almost always means `STRIPE_WEBHOOK_SECRET` is missing. Exit code is non-zero on failure.
+
+For a store, `/tienda` answering 404 is reported as a note, not a failure: it means the client's `shop_enabled` switch is off (the Heroku phase turns it on for `store`, so on a fresh store it should be 200).
+
+**AI / search catalog** — not covered by the smoke. For a store with products loaded:
+
+```bash
+curl -s https://tiendaluna.mx/catalogo.json | head -c 600   # JSON-LD @graph: the business + products with stock
+curl -s https://tiendaluna.mx/llms.txt                         # Markdown summary for LLMs
+```
+
+Both are 404 when the client turns off **Admin → Configuración → General → "Publicar el catálogo para asistentes de IA"** (`ai_catalog_enabled`). Paste a product URL into [validator.schema.org](https://validator.schema.org) to check its `Product`/`Offer` markup. Details: base repo [`docs/CATALOGO_IA.md`](https://github.com/luismnzr/eclipse-v1/blob/main/docs/CATALOGO_IA.md).
 
 **Manual checklist** (≈ 5 minutes — what the smoke can't see):
 
@@ -312,10 +347,12 @@ Update `modules:` in `config/instance.yml` in the client's repo so it stays docu
 | Symptom | Likely cause |
 |---------|-------------|
 | `eclipse_new` dies with "base local desactualizada" | Local `main` is behind `origin/main`: `git pull` in the base |
+| The client's GitHub repo contains the whole `eclipse-v1` history | "Reinitialize git history?" was answered `N`. Delete the repo and the clone, fabricate again and answer `y` |
+| `--heroku` says "config/instance.yml no tiene 'app'" | The clone only has the provisional manifest from `--no-setup`: run `bin/setup_client --local` first |
 | App crashes on boot with a license error | Typo or missing dependency in `ECLIPSE_MODULES` (e.g. `wellhub` without `reservations`) — the app fails loudly on purpose |
 | A store clone shows classes locally | No license: the clone has no `config/instance.yml` and no `ECLIPSE_MODULES`, so **all** modules are licensed. Fabricate with `--preset` or run `setup_client --local` |
 | 500 on every page of a fresh clone | Tailwind CSS not compiled — use `bin/dev` or `bin/rails tailwindcss:build` |
-| `/tienda` is 404 with `shop` licensed | The client's switch is off: **Admin → Configuración → Funcionalidades → "Habilitar tienda"** |
+| `/tienda` is 404 with `shop` licensed | The client's switch is off: **Admin → Configuración → Tienda → "Habilitar tienda/mercancía"** |
 | `POST /webhooks/stripe` → 500 | `STRIPE_WEBHOOK_SECRET` missing |
 | Users never get the confirmation email | `POSTMARK_API_TOKEN` pending, or sender domain not verified in Postmark |
 | Emails / webhooks not processed | Worker not running: `heroku ps:scale worker=1 -a <app>` |

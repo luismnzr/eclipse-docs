@@ -33,6 +33,7 @@ export default defineConfig({
           { text: 'Configuration', link: '/guide/configuration' },
           { text: 'Modules & Licensing', link: '/guide/modules' },
           { text: 'Creating a New Instance', link: '/guide/creating-an-instance' },
+          { text: 'Launching a New Store', link: '/guide/new-store' },
         ],
       },
     ],
@@ -96,6 +97,7 @@ export default defineConfig({
           text: 'Operations',
           items: [
             { text: 'Creating a New Instance', link: '/guide/creating-an-instance' },
+            { text: 'Launching a New Store', link: '/guide/new-store' },
             { text: 'Instance Factory (FABRICA.md)', link: 'https://github.com/luismnzr/eclipse-v1/blob/main/docs/FABRICA.md' },
             { text: 'Client Setup Guide', link: 'https://github.com/luismnzr/eclipse-v1/blob/main/docs/CLIENT_SETUP_GUIDE.md' },
             { text: 'Deployment Guide', link: 'https://github.com/luismnzr/eclipse-v1/blob/main/docs/DEPLOYMENT_GUIDE.md' },
