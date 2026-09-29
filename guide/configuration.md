@@ -1,58 +1,76 @@
 # Configuration
 
-Eclipse is configured at two levels: **environment variables** (set per deployment) and **studio settings** (managed via the admin dashboard).
+Eclipse is configured at three levels: the **module license** (which features exist — see [Modules & Licensing](./modules.md)), **environment variables** (set per deployment) and **studio settings** (managed by the client's admin, only within the license).
 
 ## Environment Variables
 
-These are set on the Heroku app (or in `.env` for local development).
+These are set on the Heroku app — `bin/setup_client --heroku` sets them for you (see [Creating a New Instance](./creating-an-instance.md)). Eclipse reads **every secret from ENV**; it does not use Rails encrypted credentials, so `RAILS_MASTER_KEY` is not needed.
 
-### Rails
+### Core (set by `setup_client`)
 
 | Variable | Example | Description |
 |----------|---------|-------------|
 | `RAILS_ENV` | `production` | Rails environment |
-| `RAILS_MASTER_KEY` | (from credentials) | Decrypts `credentials.yml.enc` |
 | `SECRET_KEY_BASE` | (generated) | Session and cookie signing |
-
-### Database & Redis
-
-| Variable | Example | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `postgres://...` | Auto-set by Heroku Postgres add-on |
-| `REDIS_URL` | `redis://...` | Auto-set by Heroku Redis add-on |
+| `APP_HOST` | `tiendaluna.mx` | Hostname used in emails, absolute URLs, sitemap and webhooks. Update it when the client moves to a custom domain |
+| `ECLIPSE_MODULES` | `shop,marketing` | **The instance's license.** Comma-separated modules; validated at boot. See [Modules & Licensing](./modules.md) |
+| `DATABASE_URL` | `postgres://...` | Auto-set by the Heroku Postgres add-on |
+| `REDIS_URL` | `redis://...` | Auto-set by the Heroku Redis add-on (Sidekiq, Action Cable) |
 
 ### Stripe
 
 | Variable | Example | Description |
 |----------|---------|-------------|
-| `STRIPE_PUBLISHABLE_KEY` | `pk_live_...` | Stripe public key (used in frontend) |
-| `STRIPE_SECRET_KEY` | `sk_live_...` | Stripe secret key (used in backend) |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Verifies webhook signatures |
-| `STRIPE_CONNECT_ACCOUNT_ID` | `acct_...` | Connected account ID (if using Stripe Connect) |
+| `STRIPE_SECRET_KEY` | `sk_live_...` | Backend API key. Missing → checkout fails when paying |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Verifies webhook signatures. Missing → `POST /webhooks/stripe` returns 500 |
+| `STRIPE_PUBLISHABLE_KEY` | `pk_live_...` | Set by `setup_client` for completeness; the app currently uses hosted Stripe Checkout and doesn't read it |
 
 ### Email (Postmark)
 
 | Variable | Example | Description |
 |----------|---------|-------------|
-| `POSTMARK_API_KEY` | `...` | Postmark server API token |
-| `MAILER_FROM_ADDRESS` | `hello@studio.com` | Sender email address |
-| `MAILER_FROM_NAME` | `Studio Name` | Sender display name |
+| `POSTMARK_API_TOKEN` | `...` | Server API token of the client's Postmark server. Missing → **no emails, users can't confirm their account** |
+| `MAILER_FROM_ADDRESS` | `hola@tiendaluna.mx` | Sender address (default `hello@eclipse.dev`). Must be a verified sender in Postmark |
+| `POSTMARK_WEBHOOK_SECRET` | (generated) | `marketing` only — basic-auth password of the `/webhooks/postmark` URL (opens, clicks, bounces, unsubscribes) |
+| `POSTMARK_BROADCAST_STREAM` | `broadcast` | `marketing` only — message stream for campaigns (default `broadcast`) |
 
 ### File Storage (AWS S3)
+
+Without `AWS_BUCKET`, production stores uploads on the dyno's local disk, which Heroku **wipes on every restart and deploy**. Any instance whose admin uploads images — product photos in a store, hero slides — needs S3.
 
 | Variable | Example | Description |
 |----------|---------|-------------|
 | `AWS_ACCESS_KEY_ID` | `AKIA...` | AWS access key |
 | `AWS_SECRET_ACCESS_KEY` | `...` | AWS secret key |
-| `AWS_BUCKET` | `eclipse-studio-name` | S3 bucket name |
-| `AWS_REGION` | `us-east-1` | S3 bucket region |
+| `AWS_BUCKET` | `eclipse-studios` | Bucket name; its presence switches Active Storage to S3. One bucket is shared by all clients |
+| `AWS_REGION` | `us-east-1` | Bucket region (default `us-east-1`) |
+| `STORAGE_PREFIX` | `tienda-luna` | Per-client path inside the shared bucket |
 
-### Application
+### Studio Online (MUX) — `video` only
 
-| Variable | Example | Description |
-|----------|---------|-------------|
-| `APP_HOST` | `app.studio.com` | Application hostname (used in emails, URLs) |
-| `STUDIO_NAME` | `Studio Name` | Fallback studio name |
+| Variable | Description |
+|----------|-------------|
+| `MUX_TOKEN_ID` / `MUX_TOKEN_SECRET` | Access token of the client's own MUX environment |
+| `MUX_SIGNING_KEY_ID` / `MUX_SIGNING_PRIVATE_KEY` | Signed playback (private key base64, one line) |
+| `MUX_WEBHOOK_SECRET` | Verifies `/webhooks/mux` |
+
+### Wellhub — `wellhub` only
+
+| Variable | Description |
+|----------|-------------|
+| `WELLHUB_API_KEY` | **Production** partner key. The sandbox key is different and fails every call with a bare 401 |
+| `WELLHUB_WEBHOOK_SECRET` | Per-client, generated by `setup_client`; needed to register the tenant on the gateway |
+| `WELLHUB_API_URL` | Leave unset (defaults to production); only the sandbox instance overrides it |
+
+Do not set `WELLHUB_GYM_ID`: the gateway handshake stores it in `StudioSetting` when the client clicks "Connect". See [Integrations](../features/integrations.md).
+
+### Operational
+
+| Variable | Description |
+|----------|-------------|
+| `SEED_DEMO` | `true` makes `rails db:seed` load the demo dataset in production (demo/sales instances only) |
+| `RAILS_LOG_LEVEL` | Default `info` |
+| `ACTIVE_RECORD_ENCRYPTION_*` | `PRIMARY_KEY`, `DETERMINISTIC_KEY`, `KEY_DERIVATION_SALT` — only needed on the central Wellhub gateway (encrypted tenant secrets) |
 
 ---
 
@@ -85,19 +103,29 @@ Studio settings are stored in the `StudioSetting` model as key-value pairs. They
 | Key | Default | Description |
 |-----|---------|-------------|
 | `currency` | `"mxn"` | Default currency for all pricing (passed to Stripe) |
-| `shop_enabled` | `false` | Enable/disable the retail shop module |
+| `shop_enabled` | `false` | Makes the storefront public. Only effective when the `shop` module is licensed; `setup_client` turns it on for instances without `reservations` (store/personal) |
+| `brand_color` | `"#a3946b"` | Brand color for what `theme.css` can't reach: email buttons/links and the browser `theme-color`. `setup_client` sets it to the same value as `--color-primary` |
+| `ai_catalog_enabled` | `true` | Serves `/catalogo.json` and `/llms.txt` |
+
+Shop-specific keys (`shipping_flat_rate`, `free_shipping_threshold`, `shop_categories`, `shipping_returns`, …) are documented in the base repo's [`docs/TIENDA.md`](https://github.com/luismnzr/eclipse-v1/blob/main/docs/TIENDA.md).
 
 ### How Settings Are Used
 
 Settings are accessed throughout the application via `StudioSetting`:
 
 ```ruby
-# Read a setting with a fallback
-StudioSetting.get("cancellation_window_hours", "12").to_i
+# Read a setting (falls back to StudioSetting::DEFAULTS; all values are strings)
+StudioSetting.get("cancellation_window_hours").to_i
 
-# Check a boolean setting
-StudioSetting.get("waitlist_enabled", "true") == "true"
+# Boolean settings have predicate helpers — license-aware where it applies
+StudioSetting.waitlist_enabled?
+StudioSetting.shop_enabled?   # shop licensed AND switch on
+
+# Write (unknown keys are rejected)
+StudioSetting.set("studio_name", "Tienda Luna")
 ```
+
+All settings for a request are loaded in a single query and memoized, and every write invalidates the memo.
 
 Settings that control behavior:
 
