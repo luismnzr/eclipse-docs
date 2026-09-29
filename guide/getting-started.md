@@ -1,57 +1,66 @@
 # Getting Started
 
-Local development setup for Eclipse.
+Local development setup for the Eclipse base (`eclipse-v1`). To create a client instance instead, see [Creating a New Instance](./creating-an-instance.md).
 
 ## Prerequisites
 
 | Dependency | Version | Notes |
 |-----------|---------|-------|
-| Ruby | 3.3+ | Managed via rbenv or asdf |
-| Rails | 7.2+ | Installed via Bundler |
+| Ruby | 3.3.6 | Pinned in `.ruby-version`; manage with rbenv, asdf or mise |
+| Rails | 8.1 | Installed via Bundler |
 | PostgreSQL | 16+ | Local instance or Docker |
-| Redis | 7+ | Required for Sidekiq and caching |
-| Node.js | 20+ | For Tailwind CSS and the asset pipeline |
+| Redis | 7+ | Production only (Sidekiq, Action Cable). Not needed locally: development uses the `:async` job and cable adapters |
 | Stripe CLI | Latest | For local webhook testing |
+
+No Node.js is required: JavaScript is served with importmap and Tailwind is compiled by `tailwindcss-rails`.
 
 ## Quick Start
 
 ```bash
-# Clone the repo
-git clone git@github.com:your-org/eclipse-base.git
-cd eclipse-base
+# Clone the base
+git clone https://github.com/luismnzr/eclipse-v1.git
+cd eclipse-v1
 
 # Install Ruby dependencies
 bundle install
 
-# Install JS dependencies
-yarn install
+# Create and set up the database (development seeds include demo data)
+bin/rails db:create db:migrate db:seed
 
-# Create and set up the database
-bin/rails db:create
-bin/rails db:migrate
-bin/rails db:seed
-
-# Start all services (Rails + Sidekiq + Tailwind watcher)
+# Start Rails + the Tailwind watcher
 bin/dev
 ```
 
 The app will be available at `http://localhost:3000`.
 
+::: warning Use `bin/dev`
+A bare `rails s` on a fresh checkout returns 500 until the CSS has been compiled. Use `bin/dev`, or run `bin/rails tailwindcss:build` once.
+:::
+
+## Local license
+
+The base has no `config/instance.yml` and no `ECLIPSE_MODULES`, so **every module is licensed** locally. To see the app as a given flavor, set the license for your session:
+
+```bash
+ECLIPSE_MODULES=shop bin/dev                 # behave like a "store" instance
+ECLIPSE_MODULES=shop,events bin/rails db:seed  # seeds follow the license too
+```
+
+See [Modules & Licensing](./modules.md).
+
 ## Seed Data
 
-The seed file creates everything you need to start developing:
+`db/seeds.rb` always creates the studio settings and these users (password `password`, already confirmed):
 
-| Record | Details |
-|--------|---------|
-| Admin user | `admin@eclipse.dev` / `password` |
-| Teacher user | `teacher@eclipse.dev` / `password` |
-| Student user | `student@eclipse.dev` / `password` |
-| Categories | Yoga, Pilates, Meditation |
-| Class templates | Sample templates for each category |
-| Packages | 5-class, 10-class, 20-class packs |
-| Subscription plan | Monthly unlimited |
-| Studio classes | 2 weeks of sample scheduled classes |
-| Studio settings | All default settings populated |
+| User | Role | Seeded when |
+|------|------|-------------|
+| `admin@eclipse.dev` | Admin | Always (forced password change in production) |
+| `student@eclipse.dev`, `student2@eclipse.dev` | Student | Always |
+| `teacher@eclipse.dev`, `teacher2@eclipse.dev` | Teacher | `reservations` licensed |
+
+With `reservations` it also seeds categories, class templates, packages, subscription plans and 2 weeks of scheduled classes.
+
+In development (or with `SEED_DEMO=true`), `db/seeds/demo.rb` adds a demo dataset built from the licensed modules: 42 fake students with ~2 months of history, plus classes/reservations, shop catalog and orders, events and marketing opt-ins depending on the license. See [Demo data](./creating-an-instance.md#demo-data).
 
 ## Stripe Webhook Testing
 
@@ -67,15 +76,18 @@ Copy the webhook signing secret from the Stripe CLI output and set it in your en
 export STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
+`bin/stripe_smoke` drives real test-mode events through a running instance; see [`docs/PAGOS.md`](https://github.com/luismnzr/eclipse-v1/blob/main/docs/PAGOS.md) in the base repo for the full payment-testing strategy.
+
 ## Processes
 
 `bin/dev` uses `Procfile.dev` to start:
 
 | Process | Command | Purpose |
 |---------|---------|---------|
-| **web** | `puma` on port 3000 | Rails web server |
-| **worker** | `sidekiq` | Background job processor |
-| **css** | `tailwindcss --watch` | Tailwind CSS compilation |
+| **web** | `bin/rails server` | Rails web server on port 3000 |
+| **css** | `bin/rails tailwindcss:watch` | Tailwind CSS compilation |
+
+Background jobs run in-process in development (Active Job `:async`). In production the `Procfile` runs `web` (Puma), `worker` (Sidekiq) and a `release` phase that runs `db:migrate`.
 
 ## Running Tests
 
@@ -101,37 +113,27 @@ The test suite uses:
 
 ## CI Pipeline
 
-GitHub Actions runs automatically on every push:
+GitHub Actions runs on every push:
 
 1. **Brakeman** — Security vulnerability scanning (Ruby)
 2. **Importmap Audit** — JavaScript dependency audit
 3. **RuboCop** — Ruby style and quality linting
+4. **Tests** — `bin/rails test` against Postgres 16 and Redis 7
 
 ## Development Tools
 
-Eclipse includes a few tools to speed up development:
-
 - **Letter Opener** — Preview emails in the browser at `/letter_opener` (development only)
-- **Sidekiq Web** — Monitor background jobs at `/sidekiq` (admin-only in production)
+- **Sidekiq Web** — Monitor background jobs at `/sidekiq` (admins only)
 
 ## Environment Variables
 
-For local development, create a `.env` file or use `rails credentials:edit`. At minimum you'll need:
+Eclipse reads every secret from ENV vars (no Rails encrypted credentials). For local development you only need Stripe test keys if you're testing payments:
 
 ```bash
 # Stripe (test mode keys)
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Postmark (optional for local dev — emails go to Letter Opener)
-POSTMARK_API_KEY=...
-
-# AWS S3 (optional for local dev — defaults to local file storage)
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-AWS_BUCKET=...
-AWS_REGION=...
 ```
 
-See the [Configuration](./configuration.md) guide for the full list of environment variables and studio settings.
+Emails go to Letter Opener and files to local disk, so Postmark and S3 aren't needed locally. See the [Configuration](./configuration.md) guide for the full list of environment variables and studio settings.

@@ -16,6 +16,10 @@ Eclipse gives three types of users everything they need:
 
 Eclipse is a Ruby on Rails monolith. It's not a multi-tenant SaaS — each client gets their own cloned repository, their own Heroku app, their own database, and their own Stripe account. This architecture gives every studio full data isolation and the freedom to have a completely unique design.
 
+Not every client buys the same product. The base is split into **licensable modules** (`reservations`, `events`, `shop`, `wellhub`, `video`, `marketing`) sold as presets — **studio**, **store** (ecommerce only) and **personal** — and each instance only exposes the modules on its license. See [Modules & Licensing](./modules.md).
+
+New instances are fabricated with `bin/eclipse_new` and launched with `bin/setup_client`. See [Creating a New Instance](./creating-an-instance.md).
+
 The base application is intentionally minimal in its visual design (black-and-white, unstyled but fully functional). For each new client, a UI/UX designer applies a custom theme and design layer before deployment.
 
 ```
@@ -62,6 +66,8 @@ The base application is intentionally minimal in its visual design (black-and-wh
 | [Architecture](./architecture.md) | Tech stack, patterns, data model |
 | [Getting Started](./getting-started.md) | Local development setup |
 | [Configuration](./configuration.md) | Environment variables and studio settings |
+| [Modules & Licensing](./modules.md) | Presets, `ECLIPSE_MODULES`, gating features per instance |
+| [Creating a New Instance](./creating-an-instance.md) | Step by step: fabricate, launch, verify, pause or tear down a client instance |
 | **Features** | |
 | [Reservations](../features/reservations.md) | Booking, cancellation, and attendance |
 | [Packages & Credits](../features/packages-and-credits.md) | Credit-based class packages |
@@ -72,5 +78,6 @@ The base application is intentionally minimal in its visual design (black-and-wh
 | [Admin Dashboard](../features/admin-dashboard.md) | Admin features and management tools |
 | [Teacher Views](../features/teacher-views.md) | Teacher schedule and roster tools |
 | **Operations** | |
-| [Client Setup Guide](https://github.com/luismnzr/eclipse-v1/blob/main/docs/CLIENT_SETUP_GUIDE.md) | Step-by-step new client setup |
+| [Instance Factory (FABRICA.md)](https://github.com/luismnzr/eclipse-v1/blob/main/docs/FABRICA.md) | Operational map of the factory scripts (Spanish) |
+| [Client Setup Guide](https://github.com/luismnzr/eclipse-v1/blob/main/docs/CLIENT_SETUP_GUIDE.md) | Step-by-step new client setup, including the manual path |
 | [Deployment Guide](https://github.com/luismnzr/eclipse-v1/blob/main/docs/DEPLOYMENT_GUIDE.md) | Production deployment checklist |

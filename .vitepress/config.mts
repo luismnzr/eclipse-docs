@@ -31,6 +31,8 @@ export default defineConfig({
           { text: 'Architecture', link: '/guide/architecture' },
           { text: 'Getting Started', link: '/guide/getting-started' },
           { text: 'Configuration', link: '/guide/configuration' },
+          { text: 'Modules & Licensing', link: '/guide/modules' },
+          { text: 'Creating a New Instance', link: '/guide/creating-an-instance' },
         ],
       },
     ],
@@ -74,6 +76,7 @@ export default defineConfig({
             { text: 'Architecture', link: '/guide/architecture' },
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Configuration', link: '/guide/configuration' },
+            { text: 'Modules & Licensing', link: '/guide/modules' },
           ],
         },
         {
@@ -92,6 +95,8 @@ export default defineConfig({
         {
           text: 'Operations',
           items: [
+            { text: 'Creating a New Instance', link: '/guide/creating-an-instance' },
+            { text: 'Instance Factory (FABRICA.md)', link: 'https://github.com/luismnzr/eclipse-v1/blob/main/docs/FABRICA.md' },
             { text: 'Client Setup Guide', link: 'https://github.com/luismnzr/eclipse-v1/blob/main/docs/CLIENT_SETUP_GUIDE.md' },
             { text: 'Deployment Guide', link: 'https://github.com/luismnzr/eclipse-v1/blob/main/docs/DEPLOYMENT_GUIDE.md' },
           ],
@@ -106,6 +111,7 @@ export default defineConfig({
             { text: 'Architecture', link: '/guide/architecture' },
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Configuration', link: '/guide/configuration' },
+            { text: 'Modules & Licensing', link: '/guide/modules' },
           ],
         },
         {
